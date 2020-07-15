@@ -14,8 +14,7 @@ func (s *Server) AddMsg(v interface{}) {
 }
 
 type MsgResp struct {
-	ErrCode      int
-	ErrMsg       string
+	WxErr
 	Invaliduser  string `json:"invaliduser,omitempty"`
 	Invalidparty string `json:"invalidparty,omitempty"`
 	Invalidtag   string `json:"invalidtag,omitempty"`
@@ -26,12 +25,12 @@ func (s *Server) SendMsg(v interface{}) *MsgResp {
 	url := s.MsgUrl + s.GetAccessToken()
 	body, err := util.PostJson(url, v)
 	if err != nil {
-		return &MsgResp{ErrCode: -1, ErrMsg: err.Error()}
+		return &MsgResp{WxErr: WxErr{-1, err.Error()}}
 	}
 	rst := new(MsgResp)
 	err = json.Unmarshal(body, rst)
 	if err != nil {
-		return &MsgResp{ErrCode: -1, ErrMsg: err.Error()}
+		return &MsgResp{WxErr: WxErr{-1, err.Error()}}
 	}
 	Printf("[*] 发送消息:%+v\n[*] 回执:%+v", v, *rst)
 	return rst
