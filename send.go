@@ -13,24 +13,32 @@ func (s *Server) AddMsg(v interface{}) {
 	s.MsgQueue <- v
 }
 
+type MsgResp struct {
+	ErrCode      int
+	ErrMsg       string
+	Invaliduser  string `json:"invaliduser,omitempty"`
+	Invalidparty string `json:"invalidparty,omitempty"`
+	Invalidtag   string `json:"invalidtag,omitempty"`
+}
+
 // SendMsg 发送消息
-func (s *Server) SendMsg(v interface{}) *WxErr {
+func (s *Server) SendMsg(v interface{}) *MsgResp {
 	url := s.MsgUrl + s.GetAccessToken()
 	body, err := util.PostJson(url, v)
 	if err != nil {
-		return &WxErr{-1, err.Error()}
+		return &MsgResp{ErrCode: -1, ErrMsg: err.Error()}
 	}
-	rst := new(WxErr)
+	rst := new(MsgResp)
 	err = json.Unmarshal(body, rst)
 	if err != nil {
-		return &WxErr{-1, err.Error()}
+		return &MsgResp{ErrCode: -1, ErrMsg: err.Error()}
 	}
 	Printf("[*] 发送消息:%+v\n[*] 回执:%+v", v, *rst)
 	return rst
 }
 
 // SendText 发送客服text消息,过长时按500长度自动拆分
-func (s *Server) SendText(to, msg string) (e *WxErr) {
+func (s *Server) SendText(to, msg string) (e *MsgResp) {
 	leng := utf8.RuneCountInString(msg)
 	n := leng/500 + 1
 
@@ -45,56 +53,56 @@ func (s *Server) SendText(to, msg string) (e *WxErr) {
 }
 
 // SendImage 发送客服Image消息
-func (s *Server) SendImage(to string, mediaId string) *WxErr {
+func (s *Server) SendImage(to string, mediaId string) *MsgResp {
 	return s.SendMsg(s.NewImage(to, mediaId))
 }
 
 // SendVoice 发送客服Voice消息
-func (s *Server) SendVoice(to string, mediaId string) *WxErr {
+func (s *Server) SendVoice(to string, mediaId string) *MsgResp {
 	return s.SendMsg(s.NewVoice(to, mediaId))
 }
 
 // SendFile 发送客服File消息
-func (s *Server) SendFile(to string, mediaId string) *WxErr {
+func (s *Server) SendFile(to string, mediaId string) *MsgResp {
 	return s.SendMsg(s.NewFile(to, mediaId))
 }
 
 // SendVideo 发送客服Video消息
-func (s *Server) SendVideo(to string, mediaId, title, desc string) *WxErr {
+func (s *Server) SendVideo(to string, mediaId, title, desc string) *MsgResp {
 	return s.SendMsg(s.NewVideo(to, mediaId, title, desc))
 }
 
 // SendTextcard 发送客服extcard消息
-func (s *Server) SendTextcard(to string, title, desc, url string) *WxErr {
+func (s *Server) SendTextcard(to string, title, desc, url string) *MsgResp {
 	return s.SendMsg(s.NewTextcard(to, title, desc, url))
 }
 
 // SendMusic 发送客服Music消息
-func (s *Server) SendMusic(to string, mediaId, title, desc, musicUrl, qhMusicUrl string) *WxErr {
+func (s *Server) SendMusic(to string, mediaId, title, desc, musicUrl, qhMusicUrl string) *MsgResp {
 	return s.SendMsg(s.NewMusic(to, mediaId, title, desc, musicUrl, qhMusicUrl))
 }
 
 // SendNews 发送客服news消息
-func (s *Server) SendNews(to string, arts ...Article) *WxErr {
+func (s *Server) SendNews(to string, arts ...Article) *MsgResp {
 	return s.SendMsg(s.NewNews(to, arts...))
 }
 
 // SendMpNews 发送加密新闻mpnews消息(仅企业号可用)
-func (s *Server) SendMpNews(to string, arts ...MpArticle) *WxErr {
+func (s *Server) SendMpNews(to string, arts ...MpArticle) *MsgResp {
 	return s.SendMsg(s.NewMpNews(to, arts...))
 }
 
 // SendMpNewsId 发送加密新闻mpnews消息(直接使用mediaId)
-func (s *Server) SendMpNewsId(to string, mediaId string) *WxErr {
+func (s *Server) SendMpNewsId(to string, mediaId string) *MsgResp {
 	return s.SendMsg(s.NewMpNewsId(to, mediaId))
 }
 
 // SendMarkDown 发送加密新闻mpnews消息(直接使用mediaId)
-func (s *Server) SendMarkDown(to string, content string) *WxErr {
+func (s *Server) SendMarkDown(to string, content string) *MsgResp {
 	return s.SendMsg(s.NewMarkDown(to, content))
 }
 
 // SendTaskCard 发送任务卡片taskcard消息
-func (s *Server) SendTaskCard(to string, Title, Desc, Url, TaskId, Btn string) *WxErr {
+func (s *Server) SendTaskCard(to string, Title, Desc, Url, TaskId, Btn string) *MsgResp {
 	return s.SendMsg(s.NewTaskCard(to, Title, Desc, Url, TaskId, Btn))
 }

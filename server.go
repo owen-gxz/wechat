@@ -134,7 +134,7 @@ func New(wc *WxConfig) *Server {
 	}
 
 	if s.AppType == 1 {
-		s.FetchUserList()
+		//s.FetchUserList()
 	}
 
 	s.MsgQueue = make(chan interface{}, 1000)
